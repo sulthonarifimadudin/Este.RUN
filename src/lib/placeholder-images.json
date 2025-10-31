@@ -1,3 +1,34 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero-runner",
+      "description": "A runner on a scenic trail at sunrise",
+      "imageUrl": "https://images.unsplash.com/photo-1633086706588-8f778e74bafe?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxydW5uZXIlMjBzdW5yaXNlfGVufDB8fHx8MTc2MTg1NjkwNHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "runner sunrise"
+    },
+    {
+      "id": "map-route",
+      "description": "A stylized map showing a running route",
+      "imageUrl": "https://images.unsplash.com/photo-1590948288641-fd9a53b8fb30?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxtYXAlMjByb3V0ZXxlbnwwfHx8fDE3NjE3OTIwOTV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "map route"
+    },
+    {
+      "id": "feature-track",
+      "description": "Close up of a running watch showing stats",
+      "imageUrl": "https://images.unsplash.com/photo-1743821345789-a6c3ac55fe6c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxydW5uaW5nJTIwd2F0Y2h8ZW58MHx8fHwxNzYxODgxNTI3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "running watch"
+    },
+    {
+      "id": "feature-history",
+      "description": "A calendar with running icons on several days",
+      "imageUrl": "https://images.unsplash.com/photo-1686563759042-edc83eafc3b4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxydW5uaW5nJTIwY2FsZW5kYXJ8ZW58MHx8fHwxNzYxODgxNTI3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "running calendar"
+    },
+    {
+      "id": "feature-ai",
+      "description": "An abstract representation of AI and data",
+      "imageUrl": "https://images.unsplash.com/photo-1727434032792-c7ef921ae086?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxhYnN0cmFjdCUyMEFJfGVufDB8fHx8MTc2MTg1NTgzM3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "abstract AI"
+    }
+  ]
 }
