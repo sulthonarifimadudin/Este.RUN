@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MapView from '../components/MapView';
+import { searchPlaces } from '../services/geocoding';
 import { useGeolocation } from '../hooks/useGeolocation';
 import { useTimer } from '../hooks/useTimer';
 import { haversineDistance } from '../utils/haversine';
@@ -14,6 +14,13 @@ const StartActivity = () => {
     const [isSaving, setIsSaving] = useState(false);
     const [distance, setDistance] = useState(0);
     const [currentActivityType, setCurrentActivityType] = useState('running');
+
+    // Save Modal State
+    const [showSaveModal, setShowSaveModal] = useState(false);
+    const [titleInput, setTitleInput] = useState('');
+    const [locationInput, setLocationInput] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
+    const [isSearchingLocation, setIsSearchingLocation] = useState(false);
 
     // GPS Logic: Always track location (for display), but only record when isTracking && !isPaused
     const isRecording = isTracking && !isPaused;
@@ -46,9 +53,48 @@ const StartActivity = () => {
         setIsPaused(false);
     };
 
-    const handleFinish = async () => {
+    const getDefaultTitle = () => {
+        const hour = new Date().getHours();
+        let timeOfDay = 'Pagi';
+        if (hour >= 11 && hour < 15) timeOfDay = 'Siang';
+        else if (hour >= 15 && hour < 18) timeOfDay = 'Sore';
+        else if (hour >= 18) timeOfDay = 'Malam';
+        return `Lari ${timeOfDay}`;
+    };
+
+    const handleStopClick = () => {
+        setTitleInput(getDefaultTitle());
+        setLocationInput('');
+        setSearchResults([]);
+        setShowSaveModal(true);
+    };
+
+    // Location Search Effect
+    useEffect(() => {
+        if (!locationInput || locationInput.length < 3) {
+            setSearchResults([]);
+            return;
+        }
+        if (showSaveModal) {
+            const timeoutId = setTimeout(async () => {
+                setIsSearchingLocation(true);
+                const results = await searchPlaces(locationInput);
+                setSearchResults(results);
+                setIsSearchingLocation(false);
+            }, 500);
+            return () => clearTimeout(timeoutId);
+        }
+    }, [locationInput, showSaveModal]);
+
+    const handleSelectLocation = (place) => {
+        setLocationInput(place.display_name);
+        setSearchResults([]);
+    };
+
+    const handleConfirmSave = async () => {
         setIsTracking(false);
         setIsSaving(true);
+        setShowSaveModal(false);
 
         const activityData = {
             startTime: Date.now() - (time * 1000),
@@ -57,7 +103,8 @@ const StartActivity = () => {
             pace: calculatePace(distance, time),
             routePath: routePath,
             type: currentActivityType,
-            // user_id will be handled by context later
+            title: titleInput,
+            location: locationInput,
         };
 
         const saved = await saveActivity(activityData);
@@ -174,7 +221,84 @@ const StartActivity = () => {
                 </div>
             )}
 
-            {/* Controls */}
+            {/* --- SAVE MODAL OVERLAY --- */}
+            {showSaveModal && (
+                <div className="absolute inset-0 z-50 bg-navy-950/80 backdrop-blur-md flex items-center justify-center p-6 animate-in fade-in">
+                    <div className="bg-white dark:bg-navy-900 w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-gray-100 dark:border-navy-800">
+                        <h2 className="text-2xl font-bold text-navy-900 dark:text-white mb-6 text-center">Simpan Aktivitas</h2>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Judul</label>
+                                <input
+                                    type="text"
+                                    value={titleInput}
+                                    onChange={(e) => setTitleInput(e.target.value)}
+                                    className="w-full bg-gray-50 dark:bg-navy-800 border border-gray-200 dark:border-navy-700 rounded-xl p-3 text-navy-900 dark:text-white font-bold focus:outline-none focus:ring-2 focus:ring-navy-500"
+                                    placeholder="Lari Pagi"
+                                />
+                            </div>
+
+                            <div className="relative">
+                                <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Lokasi</label>
+                                <input
+                                    type="text"
+                                    value={locationInput}
+                                    onChange={(e) => setLocationInput(e.target.value)}
+                                    className="w-full bg-gray-50 dark:bg-navy-800 border border-gray-200 dark:border-navy-700 rounded-xl p-3 text-navy-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-navy-500"
+                                    placeholder="Cari lokasi..."
+                                />
+                                {/* Search Results */}
+                                {searchResults.length > 0 && (
+                                    <div className="absolute bottom-full mb-2 left-0 w-full bg-white dark:bg-navy-800 rounded-xl shadow-xl max-h-40 overflow-y-auto border border-gray-100 dark:border-navy-700 z-50">
+                                        {searchResults.map((place, idx) => (
+                                            <button
+                                                key={idx}
+                                                onClick={() => handleSelectLocation(place)}
+                                                className="w-full text-left p-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-navy-700 border-b border-gray-50 dark:border-navy-700 last:border-0"
+                                            >
+                                                {place.display_name.split(',')[0]} <span className="text-xs text-gray-400 block truncate">{place.display_name}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Summary Stats */}
+                            <div className="grid grid-cols-3 gap-2 py-4">
+                                <div className="text-center">
+                                    <p className="text-[10px] text-gray-400 uppercase">Jarak</p>
+                                    <p className="font-bold text-navy-900 dark:text-white">{distance.toFixed(2)} km</p>
+                                </div>
+                                <div className="text-center">
+                                    <p className="text-[10px] text-gray-400 uppercase">Waktu</p>
+                                    <p className="font-bold text-navy-900 dark:text-white">{formatTime(time)}</p>
+                                </div>
+                                <div className="text-center">
+                                    <p className="text-[10px] text-gray-400 uppercase">Pace</p>
+                                    <p className="font-bold text-navy-900 dark:text-white">{currentPace}</p>
+                                </div>
+                            </div>
+
+                            <div className="flex gap-3 pt-2">
+                                <button
+                                    onClick={() => setShowSaveModal(false)}
+                                    className="flex-1 py-3 rounded-xl font-bold text-gray-500 hover:bg-gray-100 dark:hover:bg-navy-800 transition-colors"
+                                >
+                                    Batal
+                                </button>
+                                <button
+                                    onClick={handleConfirmSave}
+                                    className="flex-1 py-3 bg-navy-900 text-white rounded-xl font-bold shadow-lg hover:bg-navy-800 transition-colors"
+                                >
+                                    Simpan
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {status === 'ready' && (
                 <div className="absolute bottom-0 w-full p-8 pb-12 z-20 flex justify-center items-center gap-6 animate-in slide-in-from-bottom">
                     {!isTracking && !isSaving ? (
@@ -199,7 +323,7 @@ const StartActivity = () => {
                                         <Play size={28} fill="currentColor" className="ml-1" />
                                     </button>
                                     <button
-                                        onClick={handleFinish}
+                                        onClick={handleStopClick}
                                         className="w-16 h-16 bg-rose-500 rounded-full flex items-center justify-center text-white shadow-lg hover:scale-105 transition-transform"
                                     >
                                         <Square size={24} fill="currentColor" />
