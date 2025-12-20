@@ -1,13 +1,12 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { getActivityById } from '../services/activityStorage';
-import { updateActivityPhoto } from '../services/activityStorage'; // Need to add this
+import { getActivityById, updateActivityPhoto, updateActivityTitle, deleteActivity } from '../services/activityStorage';
 import { useEffect, useState, useRef } from 'react';
 import Layout from '../components/Layout';
 import MapView from '../components/MapView';
 import StatBox from '../components/StatBox';
 import RouteSvgRenderer from '../components/RouteSvgRenderer';
 import { formatTime } from '../utils/paceCalculator';
-import { Share2, ChevronLeft, Download, Loader2, Camera, User, Image as ImageIcon } from 'lucide-react';
+import { Share2, ChevronLeft, Download, Loader2, Camera, User, Image as ImageIcon, Pencil, Trash2, X, Check } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
@@ -19,6 +18,11 @@ const ActivityDetail = () => {
 
     const [activity, setActivity] = useState(null);
     const [loading, setLoading] = useState(true);
+
+    // Edit State
+    const [isEditingTitle, setIsEditingTitle] = useState(false);
+    const [editTitleInput, setEditTitleInput] = useState('');
+    const [isDeleting, setIsDeleting] = useState(false);
 
     // Export Refs
     const standardExportRef = useRef(null);
@@ -33,6 +37,7 @@ const ActivityDetail = () => {
             const data = await getActivityById(id);
             if (data) {
                 setActivity(data);
+                setEditTitleInput(data.title || 'Lari Santuy');
             } else {
                 console.error("Activity not found");
             }
@@ -41,19 +46,7 @@ const ActivityDetail = () => {
         fetchDetail();
     }, [id, navigate]);
 
-    useEffect(() => {
-        const fetchDetail = async () => {
-            setLoading(true);
-            const data = await getActivityById(id);
-            if (data) {
-                setActivity(data);
-            } else {
-                console.error("Activity not found");
-            }
-            setLoading(false);
-        };
-        fetchDetail();
-    }, [id, navigate]);
+    // ... (removed duplicate useEffect) ...
 
     const [exportBgMode, setExportBgMode] = useState('photo'); // 'photo' | 'map'
 
@@ -63,6 +56,30 @@ const ActivityDetail = () => {
             setExportBgMode('map');
         }
     }, [activity]);
+
+    const handleSaveTitle = async () => {
+        if (!editTitleInput.trim()) return;
+        const success = await updateActivityTitle(activity.id, editTitleInput);
+        if (success) {
+            setActivity(prev => ({ ...prev, title: editTitleInput }));
+            setIsEditingTitle(false);
+        } else {
+            alert("Gagal menyimpan judul.");
+        }
+    };
+
+    const handleDeleteActivity = async () => {
+        if (window.confirm("Yakin ingin menghapus aktivitas ini? Data tidak bisa dikembalikan.")) {
+            setIsDeleting(true);
+            const success = await deleteActivity(activity.id);
+            if (success) {
+                navigate('/');
+            } else {
+                alert("Gagal menghapus aktivitas.");
+                setIsDeleting(false);
+            }
+        }
+    };
 
     const handlePhotoUpload = async (event) => {
         try {
@@ -111,9 +128,10 @@ const ActivityDetail = () => {
                 scale: 3, // Higher resolution
                 allowTaint: true,
                 logging: false,
-                backgroundColor: null
+                backgroundColor: null,
+                ignoreElements: (element) => element.classList.contains('no-export') // Ignore edit buttons
             });
-            downloadImage(canvas.toDataURL('image/png'), `este-run-post-${activity.id}.png`);
+            downloadImage(canvas.toDataURL('image/png'), `este-run-post-${activity.title || activity.id}.png`);
         } catch (err) {
             console.error(err);
             alert("Export gagal. Coba refresh halaman.");
@@ -128,9 +146,10 @@ const ActivityDetail = () => {
         try {
             const canvas = await html2canvas(transparentExportRef.current, {
                 backgroundColor: null,
-                scale: 3
+                scale: 3,
+                ignoreElements: (element) => element.classList.contains('no-export')
             });
-            downloadImage(canvas.toDataURL('image/png'), `este-run-overlay-${activity.id}.png`);
+            downloadImage(canvas.toDataURL('image/png'), `este-run-overlay-${activity.title || activity.id}.png`);
         } catch (err) {
             console.error(err);
             alert("Export transparent gagal.");
@@ -151,11 +170,20 @@ const ActivityDetail = () => {
 
     return (
         <Layout>
+            {/* Top Navigation Bar with Delete */}
             <div className="flex items-center justify-between mb-4">
                 <button onClick={() => navigate('/stats')} className="p-2 hover:bg-gray-100 rounded-full">
                     <ChevronLeft className="text-navy-900" />
                 </button>
                 <div className="flex gap-2">
+                    <button
+                        onClick={handleDeleteActivity}
+                        disabled={isDeleting}
+                        className="p-2 hover:bg-red-50 text-red-500 rounded-full transition-colors"
+                        title="Hapus Aktivitas"
+                    >
+                        {isDeleting ? <Loader2 className="animate-spin" size={20} /> : <Trash2 size={20} />}
+                    </button>
                     <label className="p-2 hover:bg-gray-100 rounded-full text-navy-600 cursor-pointer">
                         {uploading ? <Loader2 className="animate-spin" size={20} /> : <Camera size={20} />}
                         <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} disabled={uploading} />
@@ -172,8 +200,11 @@ const ActivityDetail = () => {
                     ) : (
                         <div className="w-full h-full relative">
                             <MapView routePath={activity.routePath} interactive={false} zoom={15} />
+                            <div className="absolute inset-0 bg-gradient-to-t from-navy-950/90 via-navy-900/20 to-navy-950/40 pointer-events-none" />
                         </div>
                     )}
+                    {/* Overlay Black for Photo Mode visibility*/}
+                    {exportBgMode === 'photo' && <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/60 pointer-events-none" />}
                 </div>
 
                 {/* Gradient Layer (z-10) - Ensures visibility over Map */}
@@ -189,9 +220,41 @@ const ActivityDetail = () => {
                 <div className="absolute inset-0 z-30 flex flex-col justify-between p-6">
                     {/* Header */}
                     <div className="flex justify-between items-start">
-                        <div>
-                            <h1 className="text-3xl font-black text-white italic tracking-tighter drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Este.RUN</h1>
-                            <p className="text-white font-bold text-sm drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">{new Date(activity.startTime).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short' })}</p>
+                        <div className="flex flex-col items-start gap-1">
+                            <h1 className="text-3xl font-black text-white italic tracking-tighter drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] leading-none">Este.RUN</h1>
+
+                            {/* Editable Title Section */}
+                            <div className="flex items-center gap-2 mt-1">
+                                {isEditingTitle ? (
+                                    <div className="flex items-center gap-1 bg-black/40 backdrop-blur-md rounded-lg p-1 animate-in fade-in zoom-in slide-in-from-left-2 duration-200">
+                                        <input
+                                            type="text"
+                                            value={editTitleInput}
+                                            onChange={(e) => setEditTitleInput(e.target.value)}
+                                            className="bg-transparent border-b border-white/50 text-white font-bold italic text-sm focus:outline-none w-32 px-1"
+                                            autoFocus
+                                        />
+                                        <button onClick={handleSaveTitle} className="p-1 hover:bg-white/20 rounded-full text-green-400"><Check size={14} /></button>
+                                        <button onClick={() => setIsEditingTitle(false)} className="p-1 hover:bg-white/20 rounded-full text-red-400"><X size={14} /></button>
+                                    </div>
+                                ) : (
+                                    <div className="flex items-center gap-2 group">
+                                        <h2 className="text-xl font-bold text-white/90 italic tracking-tight drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
+                                            {activity.title}
+                                        </h2>
+                                        <button
+                                            onClick={() => { setEditTitleInput(activity.title); setIsEditingTitle(true); }}
+                                            className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-white/10 rounded-full text-white/70 no-export"
+                                        >
+                                            <Pencil size={12} />
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+
+                            <p className="text-white/80 font-bold text-xs drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] mt-1">
+                                {new Date(activity.startTime).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short' })}
+                            </p>
                         </div>
                         <div className="text-white font-bold drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] text-right text-[10px] bg-black/30 backdrop-blur-md px-3 py-1 rounded-full border border-white/20 uppercase tracking-widest">
                             {activity.type}
@@ -243,8 +306,9 @@ const ActivityDetail = () => {
                     {/* Header */}
                     <div className="z-10 mt-2 flex justify-between items-start">
                         <div>
-                            <h1 className="text-4xl font-black text-white italic tracking-tighter drop-shadow-lg" style={{ textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>Este.RUN</h1>
-                            <p className="text-white/90 font-bold text-lg drop-shadow-md">{new Date(activity.startTime).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short' })}</p>
+                            <h1 className="text-4xl font-black text-white italic tracking-tighter drop-shadow-lg leading-none" style={{ textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>Este.RUN</h1>
+                            <h2 className="text-2xl font-bold text-white/90 italic tracking-tight drop-shadow-md mt-1">{activity.title}</h2>
+                            <p className="text-white/80 font-bold text-sm drop-shadow-md mt-1">{new Date(activity.startTime).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short' })}</p>
                         </div>
                         <div className="text-white/80 font-bold drop-shadow-md text-right">
                             <p>{activity.type === 'running' ? 'LARI' : activity.type === 'cycling' ? 'SEPEDA' : 'JALAN'}</p>
