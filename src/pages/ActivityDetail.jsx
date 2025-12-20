@@ -1,12 +1,13 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { getActivityById, updateActivityPhoto, updateActivityTitle, deleteActivity } from '../services/activityStorage';
+import { getActivityById, updateActivityPhoto, updateActivityTitle, deleteActivity, updateActivityLocation } from '../services/activityStorage';
+import { searchPlaces } from '../services/geocoding';
 import { useEffect, useState, useRef } from 'react';
 import Layout from '../components/Layout';
 import MapView from '../components/MapView';
 import StatBox from '../components/StatBox';
 import RouteSvgRenderer from '../components/RouteSvgRenderer';
 import { formatTime } from '../utils/paceCalculator';
-import { Share2, ChevronLeft, Download, Loader2, Camera, User, Image as ImageIcon, Pencil, Trash2, X, Check } from 'lucide-react';
+import { Share2, ChevronLeft, Download, Loader2, Camera, User, Image as ImageIcon, Pencil, Trash2, X, Check, MapPin, Search } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
@@ -24,6 +25,12 @@ const ActivityDetail = () => {
     const [editTitleInput, setEditTitleInput] = useState('');
     const [isDeleting, setIsDeleting] = useState(false);
 
+    // Location State
+    const [isEditingLocation, setIsEditingLocation] = useState(false);
+    const [locationInput, setLocationInput] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
+    const [isSearching, setIsSearching] = useState(false);
+
     // Export Refs
     const standardExportRef = useRef(null);
     const transparentExportRef = useRef(null);
@@ -38,6 +45,7 @@ const ActivityDetail = () => {
             if (data) {
                 setActivity(data);
                 setEditTitleInput(data.title || 'Lari Santuy');
+                setLocationInput(data.location || '');
             } else {
                 console.error("Activity not found");
             }
@@ -46,7 +54,37 @@ const ActivityDetail = () => {
         fetchDetail();
     }, [id, navigate]);
 
-    // ... (removed duplicate useEffect) ...
+    // Search Places Handler (Debounced roughly by manual typing speed or onEnter)
+    useEffect(() => {
+        if (!locationInput || locationInput.length < 3) {
+            setSearchResults([]);
+            return;
+        }
+
+        // Only search if we are ACTIVELY editing and the input changed, to avoid spamming on load
+        if (isEditingLocation) {
+            const timeoutId = setTimeout(async () => {
+                setIsSearching(true);
+                const results = await searchPlaces(locationInput);
+                setSearchResults(results);
+                setIsSearching(false);
+            }, 500); // 500ms debounce
+            return () => clearTimeout(timeoutId);
+        }
+    }, [locationInput, isEditingLocation]);
+
+    const handleSelectLocation = async (place) => {
+        const placeName = place.display_name; // Short name
+        const success = await updateActivityLocation(activity.id, placeName);
+        if (success) {
+            setActivity(prev => ({ ...prev, location: placeName }));
+            setLocationInput(placeName);
+            setIsEditingLocation(false);
+            setSearchResults([]);
+        } else {
+            alert("Gagal menyimpan lokasi.");
+        }
+    };
 
     const [exportBgMode, setExportBgMode] = useState('photo'); // 'photo' | 'map'
 
@@ -224,32 +262,79 @@ const ActivityDetail = () => {
                             <h1 className="text-3xl font-black text-white italic tracking-tighter drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] leading-none">Este.RUN</h1>
 
                             {/* Editable Title Section */}
-                            <div className="flex items-center gap-2 mt-1">
-                                {isEditingTitle ? (
-                                    <div className="flex items-center gap-1 bg-black/40 backdrop-blur-md rounded-lg p-1 animate-in fade-in zoom-in slide-in-from-left-2 duration-200">
-                                        <input
-                                            type="text"
-                                            value={editTitleInput}
-                                            onChange={(e) => setEditTitleInput(e.target.value)}
-                                            className="bg-transparent border-b border-white/50 text-white font-bold italic text-sm focus:outline-none w-32 px-1"
-                                            autoFocus
-                                        />
-                                        <button onClick={handleSaveTitle} className="p-1 hover:bg-white/20 rounded-full text-green-400"><Check size={14} /></button>
-                                        <button onClick={() => setIsEditingTitle(false)} className="p-1 hover:bg-white/20 rounded-full text-red-400"><X size={14} /></button>
-                                    </div>
-                                ) : (
-                                    <div className="flex items-center gap-2 group">
-                                        <h2 className="text-xl font-bold text-white/90 italic tracking-tight drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
-                                            {activity.title}
-                                        </h2>
-                                        <button
-                                            onClick={() => { setEditTitleInput(activity.title); setIsEditingTitle(true); }}
-                                            className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-white/10 rounded-full text-white/70 no-export"
-                                        >
-                                            <Pencil size={12} />
-                                        </button>
-                                    </div>
-                                )}
+                            <div className="flex flex-col gap-1 mt-1">
+                                {/* Title Edit */}
+                                <div className="flex items-center gap-2">
+                                    {isEditingTitle ? (
+                                        <div className="flex items-center gap-1 bg-black/40 backdrop-blur-md rounded-lg p-1">
+                                            <input
+                                                type="text"
+                                                value={editTitleInput}
+                                                onChange={(e) => setEditTitleInput(e.target.value)}
+                                                className="bg-transparent border-b border-white/50 text-white font-bold italic text-sm focus:outline-none w-40 px-1"
+                                                autoFocus
+                                            />
+                                            <button onClick={handleSaveTitle} className="p-1 hover:bg-white/20 rounded-full text-green-400"><Check size={14} /></button>
+                                            <button onClick={() => setIsEditingTitle(false)} className="p-1 hover:bg-white/20 rounded-full text-red-400"><X size={14} /></button>
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-center gap-2 group">
+                                            <h2 className="text-xl font-bold text-white/90 italic tracking-tight drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
+                                                {activity.title}
+                                            </h2>
+                                            <button
+                                                onClick={() => { setEditTitleInput(activity.title); setIsEditingTitle(true); }}
+                                                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-white/10 rounded-full text-white/70 no-export"
+                                            >
+                                                <Pencil size={12} />
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Location Edit (Real Search) */}
+                                <div className="relative">
+                                    {isEditingLocation ? (
+                                        <div className="bg-black/60 backdrop-blur-md rounded-lg p-2 absolute top-0 left-0 z-50 w-64 border border-white/20 shadow-xl">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <Search size={14} className="text-white/70" />
+                                                <input
+                                                    type="text"
+                                                    value={locationInput}
+                                                    onChange={(e) => setLocationInput(e.target.value)}
+                                                    placeholder="Cari tempat (misal: Alun-alun)..."
+                                                    className="bg-transparent text-white text-xs w-full focus:outline-none placeholder-white/30"
+                                                    autoFocus
+                                                />
+                                                <button onClick={() => setIsEditingLocation(false)} className="text-white/50 hover:text-white"><X size={14} /></button>
+                                            </div>
+
+                                            {/* Search Results Dropdown */}
+                                            <div className="max-h-32 overflow-y-auto space-y-1">
+                                                {isSearching && <div className="text-white/50 text-[10px] p-1">Mencari...</div>}
+                                                {!isSearching && searchResults.length === 0 && locationInput.length > 2 && (
+                                                    <div className="text-white/50 text-[10px] p-1">Tidak ditemukan</div>
+                                                )}
+                                                {searchResults.map((place, idx) => (
+                                                    <button
+                                                        key={idx}
+                                                        onClick={() => handleSelectLocation(place)}
+                                                        className="w-full text-left text-white text-[10px] hover:bg-white/20 p-1.5 rounded truncate"
+                                                    >
+                                                        {place.display_name}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-center gap-1 group cursor-pointer" onClick={() => { setIsEditingLocation(true); setLocationInput(''); }}>
+                                            <MapPin size={12} className="text-orange-500 drop-shadow-md" />
+                                            <p className="text-white/80 font-bold text-xs drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] hover:text-orange-400 transition-colors">
+                                                {activity.location || 'Tambah Lokasi'}
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
 
                             <p className="text-white/80 font-bold text-xs drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] mt-1">
@@ -308,6 +393,12 @@ const ActivityDetail = () => {
                         <div>
                             <h1 className="text-4xl font-black text-white italic tracking-tighter drop-shadow-lg leading-none" style={{ textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>Este.RUN</h1>
                             <h2 className="text-2xl font-bold text-white/90 italic tracking-tight drop-shadow-md mt-1">{activity.title}</h2>
+                            {activity.location && (
+                                <div className="flex items-center gap-2 mt-1">
+                                    <MapPin size={16} className="text-orange-500 drop-shadow-md" />
+                                    <p className="text-white/90 font-bold text-sm drop-shadow-md">{activity.location}</p>
+                                </div>
+                            )}
                             <p className="text-white/80 font-bold text-sm drop-shadow-md mt-1">{new Date(activity.startTime).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short' })}</p>
                         </div>
                         <div className="text-white/80 font-bold drop-shadow-md text-right">
