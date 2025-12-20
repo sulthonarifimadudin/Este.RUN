@@ -375,77 +375,74 @@ const ActivityDetail = () => {
 
             {/* --- HIDDEN TRANSPARENT OVERLAY TEMPLATE --- */}
             <div className="absolute top-[-9999px] left-[-9999px]">
-                <div ref={transparentExportRef} className="w-[500px] h-[500px] flex flex-col justify-between p-8 relative" style={{ background: 'transparent' }}>
-                    {/* --- TRANSPARENT OVERLAY (For Sticker/Instagram) --- */}
-                    <div ref={transparentExportRef} className="relative w-full aspect-[4/5] bg-transparent flex flex-col justify-between overflow-hidden p-6">
-                        {/* Route Layer - Constrained to middle to avoid text overlap */}
-                        <div className="absolute z-0 inset-x-6 top-32 bottom-40 flex items-center justify-center opacity-90">
-                            <RouteSvgRenderer
-                                routePath={activity.routePath}
-                                color="#f97316"
-                                strokeWidth={6}
-                            />
+                {/* 4:5 Aspect Ratio Container (Instagram Story/Post size approx) */}
+                <div ref={transparentExportRef} className="w-[600px] h-[750px] relative bg-transparent flex flex-col justify-between overflow-hidden p-8">
+                    {/* Route Layer */}
+                    <div className="absolute z-0 inset-x-8 top-40 bottom-48 flex items-center justify-center opacity-90">
+                        <RouteSvgRenderer
+                            routePath={activity.routePath}
+                            color="#f97316"
+                            strokeWidth={8}
+                        />
+                    </div>
+
+                    {/* Content Overlay */}
+                    <div className="absolute inset-0 z-10 flex flex-col justify-between p-10">
+                        {/* Header */}
+                        <div className="z-10 mt-2 flex justify-between items-start">
+                            <div className='flex flex-col gap-2'>
+                                <h1 className="text-5xl font-black text-white italic tracking-tighter drop-shadow-lg leading-none" style={{ textShadow: '0 4px 16px rgba(0,0,0,0.5)' }}>Este.RUN</h1>
+                                <h2 className="text-3xl font-bold text-white/90 italic tracking-tight drop-shadow-md">{activity.title}</h2>
+                                {activity.location && (
+                                    <div className="flex items-center gap-2">
+                                        <MapPin size={24} className="text-orange-500 drop-shadow-md" />
+                                        <p className="text-white/90 font-bold text-lg drop-shadow-md">{activity.location}</p>
+                                    </div>
+                                )}
+                                <p className="text-white/80 font-bold text-lg drop-shadow-md">{new Date(activity.startTime).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short' })}</p>
+                            </div>
                         </div>
 
-                        {/* Content Overlay */}
-                        <div className="absolute inset-0 z-10 flex flex-col justify-between p-8">
-                            {/* Header */}
-                            <div className="z-10 mt-2 flex justify-between items-start">
+                        {/* Main Stats (Bottom) */}
+                        <div className="z-10 mt-auto">
+                            <div className="flex items-baseline mb-6">
+                                <span className="text-[140px] leading-none font-black text-white italic tracking-tighter drop-shadow-2xl" style={{ textShadow: '0 8px 30px rgba(0,0,0,0.5)' }}>
+                                    {activity.distance.toFixed(2)}
+                                </span>
+                                <span className="text-5xl font-bold text-white italic ml-4 drop-shadow-xl">KM</span>
+                            </div>
+
+                            <div className="flex gap-16 items-end border-t-4 border-white/50 pt-6">
                                 <div>
-                                    <h1 className="text-4xl font-black text-white italic tracking-tighter drop-shadow-lg leading-none" style={{ textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>Este.RUN</h1>
-                                    <h2 className="text-2xl font-bold text-white/90 italic tracking-tight drop-shadow-md mt-1">{activity.title}</h2>
-                                    {activity.location && (
-                                        <div className="flex items-center gap-2 mt-1">
-                                            <MapPin size={16} className="text-orange-500 drop-shadow-md" />
-                                            <p className="text-white/90 font-bold text-sm drop-shadow-md">{activity.location}</p>
-                                        </div>
-                                    )}
-                                    <p className="text-white/80 font-bold text-sm drop-shadow-md mt-1">{new Date(activity.startTime).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short' })}</p>
+                                    <p className="text-white/90 font-bold text-sm uppercase tracking-widest mb-1 drop-shadow-md">WAKTU</p>
+                                    <p className="text-4xl font-black text-white italic tracking-tight drop-shadow-lg">{formatTime(activity.duration)}</p>
                                 </div>
-                                {/* Removed Activity Type (LARI) as requested */}
-                            </div>
-
-                            {/* Main Stats (Bottom) */}
-                            <div className="z-10 mt-auto">
-                                {/* Huge Distance */}
-                                <div className="flex items-baseline mb-4">
-                                    <span className="text-[110px] leading-none font-black text-white italic tracking-tighter drop-shadow-xl" style={{ textShadow: '0 4px 20px rgba(0,0,0,0.5)' }}>
-                                        {activity.distance.toFixed(2)}
-                                    </span>
-                                    <span className="text-4xl font-bold text-white italic ml-4 drop-shadow-lg">KM</span>
+                                <div>
+                                    <p className="text-white/90 font-bold text-sm uppercase tracking-widest mb-1 drop-shadow-md">PACE</p>
+                                    <p className="text-4xl font-black text-white italic tracking-tight drop-shadow-lg">{activity.pace}</p>
                                 </div>
-
-                                {/* Secondary Stats Row */}
-                                <div className="flex gap-12 items-end border-t-2 border-white/50 pt-4">
-                                    <div>
-                                        <p className="text-white/90 font-bold text-xs uppercase tracking-widest mb-1 drop-shadow-md">WAKTU</p>
-                                        <p className="text-4xl font-black text-white italic tracking-tight drop-shadow-lg">{formatTime(activity.duration)}</p>
-                                    </div>
-                                    <div>
-                                        <p className="text-white/90 font-bold text-xs uppercase tracking-widest mb-1 drop-shadow-md">PACE</p>
-                                        <p className="text-4xl font-black text-white italic tracking-tight drop-shadow-lg">{activity.pace}</p>
-                                    </div>
-                                    <div>
-                                        <p className="text-white/90 font-bold text-xs uppercase tracking-widest mb-1 drop-shadow-md">KCAL</p>
-                                        <p className="text-4xl font-black text-white italic tracking-tight drop-shadow-lg">{(activity.distance * 60).toFixed(0)}</p>
-                                    </div>
+                                <div>
+                                    <p className="text-white/90 font-bold text-sm uppercase tracking-widest mb-1 drop-shadow-md">KCAL</p>
+                                    <p className="text-4xl font-black text-white italic tracking-tight drop-shadow-lg">{(activity.distance * 60).toFixed(0)}</p>
                                 </div>
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
 
-                    <div className="flex flex-col gap-3 mt-4">
-                        <button onClick={handleStandardExport} disabled={isExporting} className="w-full bg-navy-900 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-transform hover:bg-navy-800">
-                            <Download size={20} />
-                            Simpan Gambar Full
-                        </button>
-                        <button onClick={handleTransparentExport} disabled={isExporting} className="w-full bg-orange-600 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-transform hover:bg-orange-700">
-                            <ImageIcon size={20} />
-                            Simpan Overlay (Transparan)
-                        </button>
-                    </div>
-                </Layout>
-                );
+            <div className="flex flex-col gap-3 mt-4">
+                <button onClick={handleStandardExport} disabled={isExporting} className="w-full bg-navy-900 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-transform hover:bg-navy-800">
+                    <Download size={20} />
+                    Simpan Gambar Full
+                </button>
+                <button onClick={handleTransparentExport} disabled={isExporting} className="w-full bg-orange-600 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-transform hover:bg-orange-700">
+                    <ImageIcon size={20} />
+                    Simpan Overlay (Transparan)
+                </button>
+            </div>
+        </Layout>
+    );
 };
 
-                export default ActivityDetail;
+export default ActivityDetail;
