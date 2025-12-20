@@ -79,14 +79,6 @@ const transformActivity = (record) => ({
     photoUrl: record.photo_url
 });
 
-export const updateActivityPhoto = async (id, photoUrl) => {
-    // ... (existing code) ...
-};
-
-export const updateActivityTitle = async (id, title) => {
-    // ... (existing code) ...
-};
-
 export const updateActivityLocation = async (id, location) => {
     try {
         const { error } = await supabase
@@ -100,10 +92,6 @@ export const updateActivityLocation = async (id, location) => {
         console.error("Gagal update lokasi:", error);
         return false;
     }
-};
-
-export const deleteActivity = async (id) => {
-    // ... (existing code) ...
 };
 
 export const updateActivityPhoto = async (id, photoUrl) => {
