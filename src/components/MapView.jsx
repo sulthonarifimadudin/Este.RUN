@@ -82,7 +82,7 @@ const MapView = ({ routePath = [], currentPos, zoom = 15, interactive = true }) 
                 )}
 
                 {routeArrays.length > 0 && (
-                    <Polyline positions={routeArrays} color="orange" weight={5} />
+                    <Polyline positions={routeArrays} color="#3730a3" weight={5} />
                 )}
 
                 {currentPos && typeof currentPos.lat === 'number' && <RecenterAutomatically lat={currentPos.lat} lng={currentPos.lng} />}

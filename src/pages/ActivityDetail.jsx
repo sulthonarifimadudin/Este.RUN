@@ -392,7 +392,7 @@ const ActivityDetail = () => {
                         <div className="absolute inset-0 flex items-center justify-center">
                             <RouteSvgRenderer
                                 routePath={activity.routePath}
-                                strokeColor="#f97316"
+                                strokeColor="#3730a3"
                                 strokeWidth={8}
                             />
                         </div>
