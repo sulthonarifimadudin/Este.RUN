@@ -28,8 +28,9 @@ const Dashboard = () => {
     return (
         <Layout>
             {/* Sticky Header Section */}
-            <div className="sticky top-0 z-[5000] bg-gray-50/95 backdrop-blur-sm -mx-4 px-4 pt-2 pb-4 mb-2 transition-all">
-                <h2 className="text-2xl font-bold text-navy-900 mb-4">Minggu Ini</h2>
+            {/* Sticky Header Section */}
+            <div className="sticky top-0 z-[5000] bg-gray-50/95 dark:bg-navy-950/95 backdrop-blur-sm -mx-4 px-4 pt-2 pb-4 mb-2 transition-all">
+                <h2 className="text-2xl font-bold text-navy-900 dark:text-white mb-4">Minggu Ini</h2>
                 <div className="bg-gradient-to-br from-navy-800 to-navy-950 rounded-2xl p-6 text-white shadow-lg shadow-navy-900/20">
                     <div className="flex justify-between items-start mb-4">
                         <div>
@@ -44,8 +45,8 @@ const Dashboard = () => {
             </div>
 
             <div className="mb-4 flex justify-between items-end">
-                <h3 className="font-bold text-navy-900 text-lg">Aktivitas Terakhir</h3>
-                <span className="text-xs text-navy-600 font-medium">Lihat Semua</span>
+                <h3 className="font-bold text-navy-900 dark:text-white text-lg">Aktivitas Terakhir</h3>
+                <span className="text-xs text-navy-600 dark:text-navy-400 font-medium cursor-pointer hover:underline">Lihat Semua</span>
             </div>
 
             <div className="space-y-4">
@@ -54,7 +55,7 @@ const Dashboard = () => {
                         <Loader2 className="animate-spin text-navy-600" size={32} />
                     </div>
                 ) : activities.length === 0 ? (
-                    <div className="text-center py-12 bg-white rounded-xl border border-dashed border-gray-300">
+                    <div className="text-center py-12 bg-white dark:bg-navy-900 rounded-xl border border-dashed border-gray-300 dark:border-navy-700">
                         <p className="text-gray-400">Belum ada aktivitas.</p>
                         <p className="text-sm text-gray-400 mt-1">Ayo mulai bergerak!</p>
                     </div>
