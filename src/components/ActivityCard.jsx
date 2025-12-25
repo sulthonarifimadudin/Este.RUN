@@ -8,7 +8,7 @@ const ActivityCard = ({ activity }) => {
     return (
         <div
             onClick={() => navigate(`/activity/${activity.id}`)}
-            className="bg-white dark:bg-navy-900 rounded-3xl shadow-sm border border-gray-100 dark:border-navy-800 overflow-hidden mb-6 hover:shadow-md transition-all active:scale-[0.99] cursor-pointer group"
+            className="bg-white dark:bg-navy-900 rounded-3xl shadow-sm border border-gray-100 dark:border-navy-800 overflow-hidden mb-6 hover:shadow-md transition-all active:scale-[0.99] cursor-pointer group relative z-0"
         >
             {/* Header: User & Date */}
             <div className="px-5 py-4 flex items-center justify-between">
