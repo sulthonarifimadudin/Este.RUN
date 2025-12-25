@@ -168,7 +168,7 @@ const StartActivity = () => {
 
             {/* Top Bar (Only show when ready/recording) */}
             {status === 'ready' && (
-                <div className="absolute top-0 w-full p-4 z-10 flex justify-between items-center text-white animate-in slide-in-from-top">
+                <div className="absolute top-0 w-full p-4 pt-[max(1rem,env(safe-area-inset-top))] z-10 flex justify-between items-center text-white animate-in slide-in-from-top">
                     <button
                         onClick={() => navigate('/')}
                         className="bg-navy-900/50 backdrop-blur-md p-2 rounded-full hover:bg-navy-800 transition-colors"
@@ -301,7 +301,7 @@ const StartActivity = () => {
             )}
 
             {status === 'ready' && (
-                <div className="absolute bottom-0 w-full p-8 pb-12 z-20 flex justify-center items-center gap-6 animate-in slide-in-from-bottom">
+                <div className="absolute bottom-0 w-full p-8 pb-[max(3rem,env(safe-area-inset-bottom))] z-20 flex justify-center items-center gap-6 animate-in slide-in-from-bottom">
                     {!isTracking && !isSaving ? (
                         <button
                             onClick={handleStart}
