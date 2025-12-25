@@ -30,7 +30,7 @@ const Layout = ({ children }) => {
                 </div>
             </header>
 
-            <main className="flex-1 overflow-y-auto p-4 pb-24 no-scrollbar bg-gray-50 dark:bg-navy-950 transition-colors">
+            <main className="flex-1 overflow-y-auto p-4 pb-24 no-scrollbar bg-gray-50 dark:bg-navy-950 transition-colors relative">
                 {children}
             </main>
 
