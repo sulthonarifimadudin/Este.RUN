@@ -379,7 +379,7 @@ const ActivityDetail = () => {
                 <div ref={transparentExportRef} className="w-[600px] h-[750px] relative bg-transparent flex flex-col justify-between overflow-hidden p-8">
                     {/* Route Layer */}
                     {/* Route Layer */}
-                    <div className="absolute z-0 inset-x-8 top-40 bottom-48 flex items-center justify-center opacity-90">
+                    <div className="absolute z-0 inset-x-8 top-64 bottom-80 flex items-center justify-center opacity-90">
                         {/* White Outline Layer */}
                         <div className="absolute inset-0 flex items-center justify-center drop-shadow-2xl">
                             <RouteSvgRenderer
