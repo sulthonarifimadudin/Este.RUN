@@ -11,6 +11,9 @@ import { Share2, ChevronLeft, Download, Loader2, Camera, User, Image as ImageIco
 import html2canvas from 'html2canvas';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
+import { Capacitor } from '@capacitor/core';
+import { Share } from '@capacitor/share';
+import { Filesystem, Directory } from '@capacitor/filesystem';
 
 const ActivityDetail = () => {
     const { id } = useParams();
@@ -196,11 +199,35 @@ const ActivityDetail = () => {
         }
     };
 
-    const downloadImage = (dataUrl, filename) => {
-        const link = document.createElement('a');
-        link.download = filename;
-        link.href = dataUrl;
-        link.click();
+    import { Capacitor } from '@capacitor/core';
+    import { Share } from '@capacitor/share';
+    import { Filesystem, Directory } from '@capacitor/filesystem';
+
+    // ... (previous imports kept, but I need to be careful with the import block replacement or just add these)
+
+    const downloadImage = async (dataUrl, filename) => {
+        if (Capacitor.isNativePlatform()) {
+            try {
+                const base64Data = dataUrl.split(',')[1];
+                const savedFile = await Filesystem.writeFile({
+                    path: filename,
+                    data: base64Data,
+                    directory: Directory.Cache
+                });
+
+                await Share.share({
+                    files: [savedFile.uri],
+                });
+            } catch (error) {
+                console.error("Native export failed:", error);
+                alert("Gagal membagikan gambar.");
+            }
+        } else {
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = dataUrl;
+            link.click();
+        }
     };
 
     if (loading) return <Layout><div className="flex h-full items-center justify-center"><Loader2 className="animate-spin text-navy-900" /></div></Layout>;
