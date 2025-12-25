@@ -35,46 +35,47 @@ const Dashboard = () => {
             {/* Sticky Header Section */}
             {/* Sticky Header Section */}
             <div className="sticky top-0 z-40 -mx-4 -mt-6 px-4 pt-[max(1.5rem,env(safe-area-inset-top))] pb-4 mb-4 transition-all">
-                <h2
-                    className="text-xl font-bold text-navy-900 dark:text-white mb-2 drop-shadow-md"
-                    style={{ textShadow: '1px 1px 0 #172554, -1px 1px 0 #172554, 1px -1px 0 #172554, -1px -1px 0 #172554' }}
-                >
-                    Minggu Ini
-                </h2>
-                <div className="bg-gradient-to-br from-navy-800 to-navy-950 rounded-2xl p-6 text-white shadow-lg shadow-navy-900/20">
-                    <div className="flex justify-between items-start mb-4">
-                        <div>
-                            <p className="text-navy-100 font-medium text-sm">Total Jarak</p>
-                            <h3 className="text-4xl font-bold tracking-tight">{totalDistance.toFixed(1)} <span className="text-lg font-normal text-navy-200">km</span></h3>
-                        </div>
-                        <div className="bg-white/10 p-2 rounded-lg backdrop-blur-sm">
-                            <TrendingUp size={24} className="text-white" />
+                {/* Sticky Header Section */}
+                <div className="sticky top-0 z-40 -mx-4 -mt-6 px-4 pt-[max(1.5rem,env(safe-area-inset-top))] pb-4 mb-4 transition-all">
+                    <div className="inline-block bg-navy-950/90 backdrop-blur-sm rounded-xl px-4 py-2 mb-2 shadow-lg">
+                        <h2 className="text-lg font-bold text-white leading-none">
+                            Minggu Ini
+                        </h2>
+                    </div>
+                    <div className="bg-gradient-to-br from-navy-800 to-navy-950 rounded-2xl p-6 text-white shadow-lg shadow-navy-900/20">
+                        <div className="flex justify-between items-start mb-4">
+                            <div>
+                                <p className="text-navy-100 font-medium text-sm">Total Jarak</p>
+                                <h3 className="text-4xl font-bold tracking-tight">{totalDistance.toFixed(1)} <span className="text-lg font-normal text-navy-200">km</span></h3>
+                            </div>
+                            <div className="bg-white/10 p-2 rounded-lg backdrop-blur-sm">
+                                <TrendingUp size={24} className="text-white" />
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div className="mb-4 flex justify-between items-end">
-                <h3 className="font-bold text-navy-900 dark:text-white text-lg">Aktivitas Terakhir</h3>
-                <span className="text-xs text-navy-600 dark:text-navy-400 font-medium cursor-pointer hover:underline">Lihat Semua</span>
-            </div>
+                <div className="mb-4 flex justify-between items-end">
+                    <h3 className="font-bold text-navy-900 dark:text-white text-lg">Aktivitas Terakhir</h3>
+                    <span className="text-xs text-navy-600 dark:text-navy-400 font-medium cursor-pointer hover:underline">Lihat Semua</span>
+                </div>
 
-            <div className="space-y-4">
-                {loading ? (
-                    <div className="flex justify-center py-12">
-                        <Loader2 className="animate-spin text-navy-600" size={32} />
-                    </div>
-                ) : activities.length === 0 ? (
-                    <div className="text-center py-12 bg-white dark:bg-navy-900 rounded-xl border border-dashed border-gray-300 dark:border-navy-700">
-                        <p className="text-gray-400">Belum ada aktivitas.</p>
-                        <p className="text-sm text-gray-400 mt-1">Ayo mulai bergerak!</p>
-                    </div>
-                ) : (
-                    activities.map(activity => (
-                        <ActivityCard key={activity.id} activity={activity} />
-                    ))
-                )}
-            </div>
+                <div className="space-y-4">
+                    {loading ? (
+                        <div className="flex justify-center py-12">
+                            <Loader2 className="animate-spin text-navy-600" size={32} />
+                        </div>
+                    ) : activities.length === 0 ? (
+                        <div className="text-center py-12 bg-white dark:bg-navy-900 rounded-xl border border-dashed border-gray-300 dark:border-navy-700">
+                            <p className="text-gray-400">Belum ada aktivitas.</p>
+                            <p className="text-sm text-gray-400 mt-1">Ayo mulai bergerak!</p>
+                        </div>
+                    ) : (
+                        activities.map(activity => (
+                            <ActivityCard key={activity.id} activity={activity} />
+                        ))
+                    )}
+                </div>
         </Layout>
     );
 };
