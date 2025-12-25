@@ -199,11 +199,7 @@ const ActivityDetail = () => {
         }
     };
 
-    import { Capacitor } from '@capacitor/core';
-    import { Share } from '@capacitor/share';
-    import { Filesystem, Directory } from '@capacitor/filesystem';
 
-    // ... (previous imports kept, but I need to be careful with the import block replacement or just add these)
 
     const downloadImage = async (dataUrl, filename) => {
         if (Capacitor.isNativePlatform()) {
