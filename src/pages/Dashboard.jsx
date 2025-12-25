@@ -29,7 +29,8 @@ const Dashboard = () => {
         <Layout>
             {/* Sticky Header Section */}
             {/* Sticky Header Section */}
-            <div className="sticky top-0 z-[5000] bg-gray-50/95 dark:bg-navy-950/95 backdrop-blur-sm -mx-4 -mt-4 px-4 pt-[max(0px,env(safe-area-inset-top))] pb-2 mb-2 transition-all">
+            {/* Sticky Header Section */}
+            <div className="sticky top-0 z-[5000] bg-gray-50 dark:bg-navy-950 -mx-4 -mt-4 px-4 pt-[max(0px,env(safe-area-inset-top))] pb-2 mb-2 transition-all">
                 <h2 className="text-xl font-bold text-navy-900 dark:text-white mb-2 pt-4">Minggu Ini</h2>
                 <div className="bg-gradient-to-br from-navy-800 to-navy-950 rounded-2xl p-6 text-white shadow-lg shadow-navy-900/20">
                     <div className="flex justify-between items-start mb-4">
