@@ -23,8 +23,8 @@ const Layout = ({ children }) => {
 
     return (
         <div className="flex flex-col h-screen bg-gray-50 dark:bg-navy-950 max-w-md mx-auto shadow-2xl overflow-hidden border-x border-gray-200 dark:border-navy-900">
-            <header className="bg-navy-950 text-white p-4 z-50 flex justify-between items-center relative">
-                <h1 className="text-xl font-bold italic tracking-tighter">Este.RUN</h1>
+            <header className="bg-navy-950 text-white pt-[max(1rem,env(safe-area-inset-top))] pb-4 px-4 z-50 flex justify-between items-center relative">
+                <img src="/ESTE_LOGO.png" alt="Este.RUN" className="h-8 w-auto object-contain drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]" />
                 <div className="w-8 h-8 rounded-full bg-navy-800 border-2 border-navy-600 flex items-center justify-center text-xs font-bold">
                     Est
                 </div>

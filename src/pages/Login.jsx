@@ -56,7 +56,24 @@ const Login = () => {
         <div className="min-h-screen flex items-center justify-center bg-navy-950 p-4">
             <div className="bg-white rounded-2xl p-8 w-full max-w-sm shadow-2xl">
                 <div className="text-center mb-8">
-                    <h1 className="text-3xl font-bold text-navy-900 italic tracking-tighter mb-2">Este.RUN</h1>
+                    <img
+                        src="/ESTE_LOGO.png"
+                        alt="Este.RUN"
+                        className="h-12 w-auto mx-auto mb-4 object-contain"
+                        style={{
+                            filter: `
+                                drop-shadow(3px 0 0 #172554) 
+                                drop-shadow(-3px 0 0 #172554) 
+                                drop-shadow(0 3px 0 #172554) 
+                                drop-shadow(0 -3px 0 #172554) 
+                                drop-shadow(2px 2px 0 #172554) 
+                                drop-shadow(-2px 2px 0 #172554) 
+                                drop-shadow(2px -2px 0 #172554) 
+                                drop-shadow(-2px -2px 0 #172554)
+                                drop-shadow(0 4px 4px rgba(0,0,0,0.3))
+                            `
+                        }}
+                    />
                     <p className="text-gray-500 text-sm">Masuk untuk mulai berlari</p>
                 </div>
 
