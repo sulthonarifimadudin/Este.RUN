@@ -426,7 +426,7 @@ const ActivityDetail = () => {
                         {/* Header */}
                         <div className="z-10 mt-2 flex justify-between items-start">
                             <div className='flex flex-col gap-2'>
-                                <h1 className="text-5xl font-black text-white italic tracking-tighter drop-shadow-lg leading-none" style={{ textShadow: '0 4px 16px rgba(0,0,0,0.5)' }}>Este.RUN</h1>
+                                <img src="/ESTE_LOGO.png" alt="Este.RUN" className="h-16 w-auto object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.6)] mb-2" />
                                 <h2 className="text-3xl font-bold text-white/90 italic tracking-tight drop-shadow-md">{activity.title}</h2>
                                 {activity.location && (
                                     <div className="flex items-center gap-2">

@@ -35,7 +35,7 @@ const Dashboard = () => {
             {/* Sticky Header Section */}
             {/* Sticky Header Section */}
             {/* Sticky Header Section */}
-            <div className="sticky top-0 z-40 -mx-4 -mt-6 px-4 pt-[max(1.5rem,env(safe-area-inset-top))] pb-4 mb-4 transition-all">
+            <div className="sticky top-0 z-40 -mx-4 -mt-6 px-4 pt-2 pb-4 mb-4 transition-all">
                 <div className="inline-block bg-navy-950/90 backdrop-blur-sm rounded-xl px-4 py-2 mb-2 shadow-lg">
                     <h2 className="text-lg font-bold text-white leading-none">
                         Minggu Ini
