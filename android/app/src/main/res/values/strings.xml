@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Este.RUN</string>
+    <string name="title_activity_main">Este.RUN</string>
+    <string name="package_name">com.esterun.app</string>
+    <string name="custom_url_scheme">com.esterun.app</string>
+</resources>
