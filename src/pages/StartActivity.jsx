@@ -8,10 +8,11 @@ import { haversineDistance } from '../utils/haversine';
 import { calculatePace, formatTime } from '../utils/paceCalculator';
 import { usePedometer } from '../hooks/usePedometer';
 import { saveActivity } from '../services/activityStorage';
-import { Play, Pause, Square, Map as MapIcon, Loader2, ChevronLeft, Footprints, Music } from 'lucide-react';
+import { Play, Pause, Square, Map as MapIcon, Loader2, ChevronLeft, Footprints, Music, Crosshair, X } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { openMusicApp } from '../services/musicService';
 import WeatherWidget from '../components/WeatherWidget';
+import GhostWidget from '../components/GhostWidget';
 import { checkActivityBadges } from '../services/badgeService';
 import BadgePopup from '../components/BadgePopup';
 import { useAuth } from '../contexts/AuthContext';
@@ -33,6 +34,11 @@ const StartActivity = () => {
 
     const [isSearchingLocation, setIsSearchingLocation] = useState(false);
     const [unlockedBadge, setUnlockedBadge] = useState(null);
+
+    // Target Mode State
+    const [targetPace, setTargetPace] = useState(null); // format: "MM:SS"
+    const [showTargetModal, setShowTargetModal] = useState(false);
+    const [targetInput, setTargetInput] = useState('06:00'); // Default input value
 
     // GPS Logic: Always track location (for display), but only record when isTracking && !isPaused
     const isRecording = isTracking && !isPaused;
@@ -157,6 +163,15 @@ const StartActivity = () => {
 
     const currentPace = calculatePace(distance, time);
 
+    // Ghost Runner Calculation
+    let ghostDiff = 0;
+    if (targetPace && time > 0) {
+        const [tMin, tSec] = targetPace.split(':').map(Number);
+        const targetSecondsPerKm = (tMin * 60) + tSec;
+        const expectedDistance = time / targetSecondsPerKm; // in km
+        ghostDiff = distance - expectedDistance;
+    }
+
     return (
         <div className="h-screen flex flex-col bg-navy-950 relative">
 
@@ -234,6 +249,15 @@ const StartActivity = () => {
                     </div>
 
                     <button
+                        onClick={() => setShowTargetModal(true)}
+                        className={`p-2 rounded-full transition-all ml-2 border border-white/10 ${targetPace ? 'bg-indigo-500 text-white' : 'bg-black/40 backdrop-blur-md text-white hover:bg-white/20'}`}
+                        title="Set Target Pace"
+                        disabled={isTracking}
+                    >
+                        <Crosshair size={20} />
+                    </button>
+
+                    <button
                         onClick={openMusicApp}
                         className="bg-black/40 backdrop-blur-md p-2 rounded-full hover:bg-green-500 hover:text-white text-[#1DB954] transition-all ml-2 border border-white/10"
                         title="Open Spotify"
@@ -257,6 +281,11 @@ const StartActivity = () => {
                         {formatTime(time)}
                     </div>
                 </div>
+            )}
+
+            {/* Ghost Widget */}
+            {status === 'ready' && isTracking && targetPace && (
+                <GhostWidget diff={ghostDiff} targetPace={targetPace} />
             )}
 
             {/* Secondary Stats */}
@@ -397,6 +426,65 @@ const StartActivity = () => {
                     )}
                 </div>
             )}
+            {/* TARGET MODAL */}
+            {showTargetModal && (
+                <div className="absolute inset-0 z-50 bg-navy-950/80 backdrop-blur-md flex items-center justify-center p-6 animate-in fade-in">
+                    <div className="bg-white dark:bg-navy-900 w-full max-w-sm rounded-3xl p-6 shadow-2xl">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-xl font-bold text-navy-900 dark:text-white">🎯 Set Target Pace</h2>
+                            <button onClick={() => setShowTargetModal(false)} className="text-gray-400 hover:text-gray-600">
+                                <X size={24} />
+                            </button>
+                        </div>
+
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                            Masukkan pace target Anda (menit:detik / km). Hantu akan berlari dengan kecepatan ini.
+                        </p>
+
+                        <div className="flex justify-center mb-8">
+                            <input
+                                type="text"
+                                value={targetInput}
+                                onChange={(e) => {
+                                    // Simple masking logic for MM:SS
+                                    let val = e.target.value.replace(/[^0-9]/g, '');
+                                    if (val.length > 4) val = val.slice(0, 4);
+                                    if (val.length > 2) val = val.slice(0, 2) + ':' + val.slice(2);
+                                    setTargetInput(val);
+                                }}
+                                placeholder="06:00"
+                                className="text-5xl font-mono font-bold text-center bg-transparent border-b-2 border-navy-200 dark:border-navy-700 w-48 focus:outline-none focus:border-navy-500 text-navy-900 dark:text-white"
+                                maxLength={5}
+                            />
+                            <span className="self-end ml-2 mb-2 text-gray-400 font-bold">/km</span>
+                        </div>
+
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => {
+                                    setTargetPace(null);
+                                    setShowTargetModal(false);
+                                }}
+                                className="flex-1 py-3 rounded-xl font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                            >
+                                Clear
+                            </button>
+                            <button
+                                onClick={() => {
+                                    if (targetInput.length === 5) {
+                                        setTargetPace(targetInput);
+                                        setShowTargetModal(false);
+                                    }
+                                }}
+                                className="flex-1 py-3 bg-navy-900 text-white rounded-xl font-bold shadow-lg hover:bg-navy-800 transition-colors"
+                            >
+                                Set Target
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* BADGE POPUP */}
             {unlockedBadge && (
                 <BadgePopup
