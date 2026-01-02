@@ -229,20 +229,55 @@ const ActivityDetail = () => {
     };
 
     const handleShareLink = async () => {
-        const shareUrl = window.location.href; // Or construct specifically if needed
+        setIsExporting(true);
+        const shareUrl = window.location.href;
         const shareTitle = `Lihat lari gue: ${activity.title} (${activity.distance.toFixed(1)}km)`;
         const shareText = `Gue baru aja lari sejauh ${activity.distance.toFixed(2)}km di Este.RUN! Cek detailnya:`;
 
         try {
+            // 1. Capture Image
+            if (!standardExportRef.current) return;
+            // Wait for map
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            const canvas = await html2canvas(standardExportRef.current, {
+                useCORS: true,
+                scale: 2,
+                allowTaint: true,
+                logging: false,
+                backgroundColor: null,
+                ignoreElements: (element) => element.classList.contains('no-export')
+            });
+
+            const dataUrl = canvas.toDataURL('image/png');
+            const blob = await (await fetch(dataUrl)).blob();
+            const fileName = `este-run-${activity.id}.png`;
+
             if (Capacitor.isNativePlatform()) {
+                const base64Data = dataUrl.split(',')[1];
+                const savedFile = await Filesystem.writeFile({
+                    path: fileName,
+                    data: base64Data,
+                    directory: Directory.Cache
+                });
+
                 await Share.share({
                     title: shareTitle,
                     text: shareText,
                     url: shareUrl,
+                    files: [savedFile.uri],
                     dialogTitle: 'Bagikan Aktivitas',
                 });
             } else {
-                if (navigator.share) {
+                const file = new File([blob], fileName, { type: 'image/png' });
+                if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        title: shareTitle,
+                        text: shareText,
+                        url: shareUrl,
+                        files: [file]
+                    });
+                } else if (navigator.share) {
                     await navigator.share({
                         title: shareTitle,
                         text: shareText,
@@ -250,12 +285,13 @@ const ActivityDetail = () => {
                     });
                 } else {
                     await navigator.clipboard.writeText(shareUrl);
-                    alert("Link disalin ke clipboard! 📋");
+                    alert("Link disalin ke clipboard! (Browser tidak support share gambar)");
                 }
             }
         } catch (error) {
             console.error("Error sharing:", error);
-            // Ignore abort error
+        } finally {
+            setIsExporting(false);
         }
     };
 
