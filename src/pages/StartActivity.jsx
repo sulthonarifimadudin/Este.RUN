@@ -11,8 +11,13 @@ import { saveActivity } from '../services/activityStorage';
 import { Play, Pause, Square, Map as MapIcon, Loader2, ChevronLeft, Footprints, Music } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { openMusicApp } from '../services/musicService';
+import WeatherWidget from '../components/WeatherWidget';
+import { checkActivityBadges } from '../services/badgeService';
+import BadgePopup from '../components/BadgePopup';
+import { useAuth } from '../contexts/AuthContext';
 
 const StartActivity = () => {
+    const { user } = useAuth();
     const { t, language } = useLanguage();
     const [isTracking, setIsTracking] = useState(false);
     const [isPaused, setIsPaused] = useState(false);
@@ -25,7 +30,9 @@ const StartActivity = () => {
     const [titleInput, setTitleInput] = useState('');
     const [locationInput, setLocationInput] = useState('');
     const [searchResults, setSearchResults] = useState([]);
+
     const [isSearchingLocation, setIsSearchingLocation] = useState(false);
+    const [unlockedBadge, setUnlockedBadge] = useState(null);
 
     // GPS Logic: Always track location (for display), but only record when isTracking && !isPaused
     const isRecording = isTracking && !isPaused;
@@ -130,7 +137,19 @@ const StartActivity = () => {
         setIsSaving(false);
 
         if (saved) {
-            navigate(`/activity/${saved.id}`);
+            // Check for new badges
+            const newBadges = await checkActivityBadges(activityData, user.id);
+            if (newBadges.length > 0) {
+                setUnlockedBadge(newBadges[0]); // Show the first new badge
+                // Note: If multiple badges unlocked, we currently only show one for simplicity. 
+                // A queue system could be implemented for multiple.
+
+                // Delay navigation slightly to show badge, OR user closes badge to navigate.
+                // But current logical flow: navigate is called immediately.
+                // We should WAIT for user to close badge if one exists.
+            } else {
+                navigate(`/activity/${saved.id}`);
+            }
         } else {
             alert("Gagal menyimpan aktivitas ke database!");
         }
@@ -198,6 +217,8 @@ const StartActivity = () => {
                         <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                         GPS: {Math.round(location?.accuracy || 0)}m
                     </div>
+
+                    <WeatherWidget latitude={location?.lat} longitude={location?.lng} />
 
                     <div className="flex bg-navy-900/50 backdrop-blur-md rounded-full text-white border border-white/20 p-1">
                         <select
@@ -375,6 +396,16 @@ const StartActivity = () => {
                         </>
                     )}
                 </div>
+            )}
+            {/* BADGE POPUP */}
+            {unlockedBadge && (
+                <BadgePopup
+                    badge={unlockedBadge}
+                    onClose={() => {
+                        setUnlockedBadge(null);
+                        navigate('/stats');
+                    }}
+                />
             )}
         </div>
     );

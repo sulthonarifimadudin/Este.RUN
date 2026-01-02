@@ -10,6 +10,8 @@ import { useEffect, useState } from 'react';
 import { Users, List, Activity } from 'lucide-react';
 import ActivityCard from '../components/ActivityCard'; // Import ActivityCard
 import { getActivitiesByUserId } from '../services/activityStorage'; // Import fetcher
+import { BADGES, getUserBadges } from '../services/badgeService';
+import { Award } from 'lucide-react';
 
 const Profile = () => {
     const { user, signOut } = useAuth();
@@ -20,7 +22,8 @@ const Profile = () => {
     const [profile, setProfile] = useState(null);
     const [stats, setStats] = useState({ followers: 0, following: 0 });
     const [myActivities, setMyActivities] = useState([]); // State for activities
-    const [activeTab, setActiveTab] = useState('menu'); // 'menu' | 'activities'
+    const [userBadges, setUserBadges] = useState([]); // State for badges
+    const [activeTab, setActiveTab] = useState('menu'); // 'menu' | 'activities' | 'badges'
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -35,6 +38,10 @@ const Profile = () => {
                 // Fetch My Activities
                 const activities = await getActivitiesByUserId(user.id);
                 setMyActivities(activities);
+
+                // Fetch Badges
+                const earnedBadges = await getUserBadges(user.id);
+                setUserBadges(earnedBadges);
             }
             setLoading(false);
         }
@@ -99,6 +106,13 @@ const Profile = () => {
                 >
                     <Activity size={16} /> {t('my_activities')}
                 </button>
+                <button
+                    onClick={() => setActiveTab('badges')}
+                    className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-2
+                    ${activeTab === 'badges' ? 'bg-white dark:bg-navy-700 text-navy-900 dark:text-white shadow-sm' : 'text-gray-400 dark:text-gray-500'}`}
+                >
+                    <Award size={16} /> Badges
+                </button>
             </div>
 
             {/* Content: Activities */}
@@ -114,6 +128,36 @@ const Profile = () => {
                                 <p className="text-gray-400 text-sm">{t('no_activities')}</p>
                             </div>
                         )}
+                    </div>
+                </div>
+            )}
+
+            {/* Content: Badges */}
+            {activeTab === 'badges' && (
+                <div className="mb-6 animate-slide-up">
+                    <div className="grid grid-cols-2 gap-4">
+                        {BADGES.map((badge) => {
+                            const isUnlocked = userBadges.some(ub => ub.badge_id === badge.id);
+                            return (
+                                <div
+                                    key={badge.id}
+                                    className={`relative p-4 rounded-2xl border transition-all ${isUnlocked
+                                        ? 'bg-white dark:bg-navy-800 border-navy-100 dark:border-navy-700 shadow-sm'
+                                        : 'bg-gray-100 dark:bg-navy-900 border-transparent opacity-60 grayscale'
+                                        }`}
+                                >
+                                    <div className="text-3xl mb-3">{badge.icon}</div>
+                                    <h3 className="font-bold text-navy-900 dark:text-white text-sm">{badge.name}</h3>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">{badge.description}</p>
+
+                                    {isUnlocked && (
+                                        <div className="absolute top-3 right-3 text-yellow-500">
+                                            <Award size={16} fill="currentColor" />
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
             )}
