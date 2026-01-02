@@ -55,7 +55,6 @@ export const sendMessageToGemini = async (history, newMessage) => {
 
     } catch (error) {
         console.error("Coach Este Error:", error);
-        const maskedKey = API_KEY ? `${API_KEY.slice(0, 5)}...${API_KEY.slice(-4)}` : "UNDEFINED";
-        return `Maaf, Coach lagi pusing 😵.\nError: ${error.message || error.toString()}\n(Key: ${maskedKey})`;
+        return `Maaf, Coach lagi pusing 😵.\nError: ${error.message || error.toString()}`;
     }
 };
