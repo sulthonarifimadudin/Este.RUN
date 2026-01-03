@@ -42,7 +42,7 @@ export const sendMessageToGemini = async (history, newMessage) => {
                 // REMOVED REFERER to avoid 'User not found' on localhost
             },
             body: JSON.stringify({
-                "model": "deepseek/deepseek-chat", // Using DeepSeek via OpenRouter
+                "model": "xiaomi/mimo-v2-flash:free", // Using Xiaomi Mimo Flash via OpenRouter
                 "messages": messages
             })
         });

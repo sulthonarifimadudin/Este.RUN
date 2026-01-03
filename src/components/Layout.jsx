@@ -88,8 +88,8 @@ const Layout = ({ children }) => {
                 <NavItem to="/profile" icon={User} label={t('profile')} />
             </nav>
 
-            {/* <CoachChat /> */}
-            {/* <CoachChat /> */}
+            <CoachChat />
+
         </div>
     );
 };
