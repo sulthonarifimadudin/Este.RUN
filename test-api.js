@@ -1,39 +1,28 @@
 
-const API_KEY = "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";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-async function testOpenRouter() {
-    console.log("Testing OpenRouter API...");
-    console.log("Key:", API_KEY.slice(0, 10) + "...");
+const API_KEY = "AIzaSyDZw2Kz3_85ZnGZWg-09OFjuUx2_v0WOBg";
+
+async function testSDK() {
+    console.log("Testing Google Gemini SDK...");
 
     try {
-        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${API_KEY}`,
-                "Content-Type": "application/json",
-                "HTTP-Referer": "https://esterun.app",
-                "X-Title": "Este.RUN"
-            },
-            body: JSON.stringify({
-                "model": "deepseek/deepseek-chat",
-                "messages": [
-                    { "role": "user", "content": "Hello, are you online?" }
-                ]
-            })
-        });
+        const genAI = new GoogleGenerativeAI(API_KEY);
+        // Using "gemini-pro" as it's the standard for free tier text
+        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
-        console.log("Status:", response.status);
-        const data = await response.json();
+        const prompt = "Hello! Reply 'Gemini SDK Online'.";
+        console.log("Prompting:", prompt);
 
-        if (!response.ok) {
-            console.error("ERROR RESPONSE:", JSON.stringify(data, null, 2));
-        } else {
-            console.log("SUCCESS:", data.choices[0].message.content);
-        }
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
+
+        console.log("SUCCESS:", text);
 
     } catch (error) {
-        console.error("FETCH ERROR:", error);
+        console.error("SDK ERROR:", error);
     }
 }
 
-testOpenRouter();
+testSDK();
