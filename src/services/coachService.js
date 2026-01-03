@@ -1,7 +1,7 @@
 // Access API Key from Environment Variables
 // Sanitize key (remove quotes/spaces if user accidentally added them)
 // TEMPORARY DEBUG: Hardcoded key to bypass .env caching issues
-const API_KEY = "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"; // import.meta.env.VITE_OPENROUTER_API_KEY?.trim().replace(/^["']|["']$/g, '');
+const API_KEY = "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"; // import.meta.env.VITE_OPENROUTER_API_KEY?.trim().replace(/^["']|["']$/g, '');
 
 const SYSTEM_PROMPT = `
 You are "Coach Este", an energetic, professional, and friendly Running Coach for the Este.RUN app.
