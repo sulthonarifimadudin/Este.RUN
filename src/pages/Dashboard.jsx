@@ -27,11 +27,7 @@ const Dashboard = () => {
             const stored = await getActivities();
             setActivities(stored || []);
 
-            // Fetch Weekly Recap Stats
-            if (user) {
-                const stats = await getWeeklyStats(user.id);
-                setWeeklyStats(stats);
-            }
+
 
             setLoading(false);
         };
