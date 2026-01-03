@@ -10,7 +10,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { calculateStats } from '../services/recapService';
 import WeeklyRecapCard from '../components/WeeklyRecapCard';
 
-import { useEffect, useState } => {
+const Dashboard = () => {
     const { t } = useLanguage();
     const navigate = useNavigate();
     const { user } = useAuth(); // Get authenticated user
