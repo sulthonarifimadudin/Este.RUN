@@ -84,7 +84,7 @@ const Dashboard = () => {
     return (
         <Layout>
             {/* Sticky Header Section */}
-            <div className="sticky top-0 z-40 -mx-4 -mt-6 px-4 pt-2 pb-4 mb-4 transition-all">
+            <div className="sticky top-0 z-40 -mx-4 -mt-6 px-4 pt-6 pb-4 mb-4 transition-all bg-gray-50/95 dark:bg-navy-950/95 backdrop-blur-md shadow-sm border-b border-gray-100 dark:border-navy-800">
                 <div className="relative inline-block z-50 mb-4">
                     <button
                         onClick={() => setShowRangeMenu(!showRangeMenu)}
