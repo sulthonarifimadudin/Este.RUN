@@ -7,12 +7,14 @@ const WeeklyRecapCard = ({ stats, title = "Weekly Wrap" }) => {
     if (!stats) return null;
 
     const formatDuration = (seconds) => {
+        if (!seconds || isNaN(seconds)) return "0m";
         const h = Math.floor(seconds / 3600);
         const m = Math.floor((seconds % 3600) / 60);
         return h > 0 ? `${h}h ${m}m` : `${m}m`;
     };
 
     const formatPace = (pace) => {
+        if (!pace || isNaN(pace) || !isFinite(pace)) return "-'--\"";
         const m = Math.floor(pace);
         const s = Math.round((pace - m) * 60);
         return `${m}'${s < 10 ? '0' : ''}${s}"`;
@@ -65,7 +67,7 @@ const WeeklyRecapCard = ({ stats, title = "Weekly Wrap" }) => {
                             <Flame size={12} />
                             <span className="text-[10px] uppercase">Cals</span>
                         </div>
-                        <p className="font-bold text-sm">{Math.round(stats.totalCalories)}</p>
+                        <p className="font-bold text-sm">{Math.round(stats.totalCalories || 0)}</p>
                     </div>
 
                     <div className="flex flex-col border-l border-white/10 pl-3">
