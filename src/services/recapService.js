@@ -13,7 +13,7 @@ export const calculateStats = (activities) => {
             activityCount: 0,
             persona: "Ready to Start",
             personaEmoji: "👟",
-            personaColor: "from-slate-700 to-slate-600" // Dark grey default
+            personaColor: "from-navy-700 to-navy-900" // Este.RUN Navy Default
         };
     }
 
