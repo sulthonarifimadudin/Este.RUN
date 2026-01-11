@@ -8,7 +8,41 @@ import { toggleLike, getLikeStatus } from '../services/socialService';
 import CommentSheet from './CommentSheet';
 
 const ActivityCard = ({ activity, userProfile }) => {
-    // ... hooks ...
+    const navigate = useNavigate();
+    const { user } = useAuth();
+    const [likes, setLikes] = useState(0);
+    const [isLiked, setIsLiked] = useState(false);
+    const [showComments, setShowComments] = useState(false);
+
+    useEffect(() => {
+        const fetchLikes = async () => {
+            const status = await getLikeStatus(activity.id, user?.id);
+            setLikes(status.count);
+            setIsLiked(status.isLiked);
+        };
+        fetchLikes();
+    }, [activity.id, user?.id]);
+
+    const handleLike = async (e) => {
+        e.stopPropagation();
+        if (!user) return;
+
+        // Optimistic
+        setIsLiked(!isLiked);
+        setLikes(prev => isLiked ? prev - 1 : prev + 1);
+
+        const result = await toggleLike(activity.id, user.id);
+        if (result === null) {
+            // Revert on error
+            setIsLiked(isLiked);
+            setLikes(prev => isLiked ? prev + 1 : prev - 1);
+        }
+    };
+
+    const handleCommentClick = (e) => {
+        e.stopPropagation();
+        setShowComments(true);
+    };
 
     // Determine user to display (Priority: activity.user > userProfile > default)
     const displayUser = activity.user || userProfile || {

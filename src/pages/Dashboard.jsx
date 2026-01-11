@@ -155,10 +155,9 @@ const Dashboard = () => {
                         <p className="text-gray-400">{t('no_activities')}</p>
                     </div>
                 ) : (
-                ): (
-                        activities.map(activity => (
-                <ActivityCard key={activity.id} activity={activity} userProfile={userProfile} />
-                ))
+                    activities.map(activity => (
+                        <ActivityCard key={activity.id} activity={activity} userProfile={userProfile} />
+                    ))
                 )}
             </div>
         </Layout >
