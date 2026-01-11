@@ -127,16 +127,36 @@ const StartActivity = () => {
         setIsSaving(true);
         setShowSaveModal(false);
 
+        // Calculate Step Distance fallback
+        const strideLength = currentActivityType === 'running' ? 1.0 : 0.74; // meters
+        const stepDistKm = (steps * strideLength) / 1000;
+
+        // Use the greater of GPS distance or Step distance (simple fallback logic)
+        // Ideally we'd detect GPS accuracy, but this covers the "Running Indoors" case.
+        const effectiveDistance = Math.max(distance, stepDistKm);
+
+        // Improved Calorie Calculation
+        // invalid if distance is 0? Use time based as fallback.
+        // Approx: Running ~10 METs, Walking ~3.5 METs
+        // Let's stick to the distance formula but add a time floor if distance is close to 0
+        // Old: distance * 60 (approx 60kcal/km) -> seems low for running? (usually 1kcal/kg/km, say 70kg -> 70kcal/km)
+        // Let's use: Distance * 65. If 0, use Time * 4 (kcal/min) ~ 240/hr.
+        let calculatedCalories = effectiveDistance * 65;
+        if (effectiveDistance < 0.1 && time > 60) {
+            const kcalPerMin = currentActivityType === 'running' ? 8 : 4;
+            calculatedCalories = (time / 60) * kcalPerMin;
+        }
+
         const activityData = {
             startTime: Date.now() - (time * 1000),
             duration: time,
-            distance: distance,
-            pace: calculatePace(distance, time),
+            distance: effectiveDistance,
+            pace: calculatePace(effectiveDistance, time),
             routePath: routePath,
             type: currentActivityType,
             title: titleInput,
             location: locationInput,
-            steps: currentActivityType === 'walking' ? steps : 0, // Save steps only for walking
+            steps: steps, // Always save steps
         };
 
         const saved = await saveActivity(activityData);
@@ -275,7 +295,7 @@ const StartActivity = () => {
                     style={{ transform: isTracking ? 'translateY(0)' : 'translateY(20px)' }}
                 >
                     <h1 className="text-7xl font-bold font-mono tracking-tighter drop-shadow-lg">
-                        {distance.toFixed(2)}<span className="text-2xl ml-2 font-sans font-medium opacity-80">km</span>
+                        {Math.max(distance, (steps * (currentActivityType === 'running' ? 1.0 : 0.74) / 1000)).toFixed(2)}<span className="text-2xl ml-2 font-sans font-medium opacity-80">km</span>
                     </h1>
                     <div className="text-xl opacity-90 mt-2 font-medium bg-navy-900/60 backdrop-blur px-4 py-1 rounded-full">
                         {formatTime(time)}
@@ -299,7 +319,9 @@ const StartActivity = () => {
                     </div>
                     <div className="bg-navy-900/60 backdrop-blur-sm p-3 rounded-xl min-w-[100px] text-center">
                         <p className="text-xs text-navy-200 uppercase tracking-widest">{t('cal')}</p>
-                        <p className="text-xl font-bold text-white">{(distance * 60).toFixed(0)}</p>
+                        <p className="text-xl font-bold text-white">
+                            {(Math.max(distance, (steps * (currentActivityType === 'running' ? 1.0 : 0.74) / 1000)) * 65).toFixed(0)}
+                        </p>
                     </div>
                 </div>
             )}
