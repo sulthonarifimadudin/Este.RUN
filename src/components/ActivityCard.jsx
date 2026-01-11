@@ -52,17 +52,40 @@ const ActivityCard = ({ activity }) => {
             {/* Header: User & Date */}
             <div className="px-5 py-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-navy-100 dark:bg-navy-800 flex items-center justify-center text-navy-700 dark:text-navy-200 font-bold text-sm">
-                        E
-                    </div>
+                    {/* AVATAR */}
+                    {activity.user?.avatarUrl ? (
+                        <img
+                            src={activity.user.avatarUrl}
+                            alt={activity.user.username}
+                            className="w-10 h-10 rounded-full object-cover border border-gray-100 dark:border-navy-700"
+                        />
+                    ) : (
+                        <div className="w-10 h-10 rounded-full bg-navy-100 dark:bg-navy-800 flex items-center justify-center text-navy-700 dark:text-navy-200 font-bold text-sm">
+                            {activity.user?.username?.[0]?.toUpperCase() || 'R'}
+                        </div>
+                    )}
+
+                    {/* USERNAME & DETAILS */}
                     <div>
-                        <h4 className="font-bold text-navy-900 dark:text-white leading-tight">{activity.title || 'Lari Santuy'}</h4>
-                        <div className="flex items-center gap-1 text-xs text-gray-400 dark:text-gray-500">
+                        <h4 className="font-bold text-navy-900 dark:text-white leading-tight">
+                            {activity.user?.username || 'Runner'}
+                        </h4>
+                        <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                            {/* Activity Title */}
+                            <span className="font-medium text-navy-600 dark:text-navy-300">
+                                {activity.title || 'Lari Santuy'}
+                            </span>
+
+                            <span>•</span>
+
+                            {/* Date */}
                             <span>{new Date(activity.startTime).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}</span>
+
                             {activity.location && (
                                 <>
                                     <span>•</span>
-                                    <span>{activity.location.split(',')[0]}</span>
+                                    {/* Truncate location if too long */}
+                                    <span className="max-w-[100px] truncate">{activity.location.split(',')[0]}</span>
                                 </>
                             )}
                         </div>
